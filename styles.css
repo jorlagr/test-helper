@@ -863,6 +863,52 @@ h1 span {
   line-height: 1.5;
 }
 
+.result-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.result-choice {
+  display: flex;
+  min-width: 0;
+  min-height: 43px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid #e8edf4;
+  border-radius: 7px;
+  color: #778398;
+  background: #fff;
+}
+
+.result-choice.is-selected {
+  border-color: #e7aaaa;
+  color: #b94f4f;
+  background: #fff3f3;
+}
+
+.result-choice.is-correct {
+  border-color: #9bd9c1;
+  color: #16835d;
+  background: #eaf8f3;
+}
+
+.result-choice-letter {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.result-choice-label {
+  min-height: 9px;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
 @media (max-width: 640px) {
   .stepper {
     gap: 12px;

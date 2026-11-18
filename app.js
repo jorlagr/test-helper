@@ -149,6 +149,40 @@ function renderResults() {
     const detail = document.createElement("p");
     detail.className = "result-detail";
 
+    const optionSummary = document.createElement("div");
+    optionSummary.className = "result-choices";
+    optionSummary.setAttribute("aria-label", "Opciones, tu respuesta y respuesta correcta");
+
+    for (const choice of choices) {
+      const option = document.createElement("span");
+      option.className = "result-choice";
+      const labels = [];
+
+      if (response === choice) {
+        option.classList.add("is-selected");
+        labels.push("Marcaste");
+      }
+      if (key === choice) {
+        option.classList.add("is-correct");
+        labels.push("Correcta");
+      }
+
+      const letter = document.createElement("span");
+      letter.className = "result-choice-letter";
+      letter.textContent = choice.toUpperCase();
+
+      const label = document.createElement("span");
+      label.className = "result-choice-label";
+      label.textContent = labels.join(" · ");
+
+      option.setAttribute(
+        "aria-label",
+        `Opción ${choice.toUpperCase()}${labels.length ? `, ${labels.join(" y ")}` : ""}`,
+      );
+      option.append(letter, label);
+      optionSummary.append(option);
+    }
+
     if (!response) {
       blank += 1;
       item.classList.add("result-blank");
@@ -167,7 +201,7 @@ function renderResults() {
     }
 
     heading.append(title, status);
-    item.append(heading, detail);
+    item.append(heading, optionSummary, detail);
     resultList.append(item);
   }
 
