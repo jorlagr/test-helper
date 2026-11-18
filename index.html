@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f5f7fb">
-    <meta name="description" content="Hoja de respuestas para organizar y corregir tests de 50 preguntas.">
-    <title>Hoja de respuestas | Test listo</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
+    <meta name="description" content="Corrige tests, consulta las respuestas correctas y calcula la nota sobre 10.">
+    <title>Corrección de test | Test listo</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+    <script src="app.js?v=2" defer></script>
   </head>
   <body>
     <main class="page-shell">
@@ -16,46 +16,117 @@
           <span class="brand-icon" aria-hidden="true">T</span>
           <span>test<span class="brand-accent">listo</span></span>
         </a>
-        <span class="topbar-note">Tu hoja de respuestas</span>
+        <span class="topbar-note">Corrección de test</span>
       </header>
 
       <section class="intro" aria-labelledby="page-title">
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> HOJA DE RESPUESTAS</p>
-        <h1 id="page-title">Un test cada vez.<br><span>Todas tus respuestas en orden.</span></h1>
-        <p class="intro-copy">Marca una opción por pregunta mientras revisas tu test en papel. Puedes cambiar tus respuestas o empezar de nuevo cuando quieras.</p>
+        <h1 id="page-title">Corrige tu test.<br><span>Entiende tu resultado.</span></h1>
+        <p class="intro-copy">Indica cuántas preguntas tiene, marca tus respuestas y compáralas con la plantilla correcta.</p>
       </section>
 
-      <section class="progress-panel" aria-label="Progreso del test">
-        <div class="progress-info">
-          <div>
-            <p class="progress-label">Tu progreso</p>
-            <p class="progress-count"><span id="answered-count">0</span><span class="count-divider">/</span>50 <span class="progress-caption">preguntas respondidas</span></p>
+      <ol class="stepper" aria-label="Pasos para corregir el test">
+        <li class="step-item" data-step="1"><span class="step-number">1</span><span>Número</span></li>
+        <li class="step-item" data-step="2"><span class="step-number">2</span><span>Tu test</span></li>
+        <li class="step-item" data-step="3"><span class="step-number">3</span><span>Clave</span></li>
+        <li class="step-item" data-step="4"><span class="step-number">4</span><span>Resultado</span></li>
+      </ol>
+
+      <section class="view" id="setup-view" aria-labelledby="setup-title">
+        <form class="setup-card" id="setup-form">
+          <div class="setup-icon" aria-hidden="true">01</div>
+          <div class="setup-copy">
+            <h2 id="setup-title">¿Cuántas preguntas tiene tu test?</h2>
+            <p>Preparamos una hoja a medida. Puedes elegir entre 1 y 1000 preguntas.</p>
           </div>
-          <button class="reset-button" id="reset-button" type="button">
-            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-              <path d="M3.5 5.5h13M8 5.5V3.75h4V5.5m3.5 0-.65 10.1a1.5 1.5 0 0 1-1.5 1.4h-6.7a1.5 1.5 0 0 1-1.5-1.4L4.5 5.5m3.25 3v5m4.5-5v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Borrar respuestas
-          </button>
+          <label class="field-label" for="question-count">Número de preguntas</label>
+          <input class="number-input" id="question-count" name="question-count" type="number" min="1" max="1000" step="1" value="50" required>
+          <button class="primary-button" type="submit">Preparar test <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <section class="view" id="answers-view" aria-labelledby="answers-title" hidden>
+        <div class="view-heading">
+          <div>
+            <h2 id="answers-title">Marca tus respuestas</h2>
+            <p>Deja en blanco las preguntas que no hayas contestado; no suman ni restan.</p>
+          </div>
+          <span class="question-total" id="answer-total"></span>
         </div>
-        <div class="progress-track" id="progress-track" role="progressbar" aria-label="Preguntas respondidas" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-          <span class="progress-fill" id="progress-fill"></span>
+        <section class="progress-panel" aria-label="Progreso de tus respuestas">
+          <div class="progress-info">
+            <div>
+              <p class="progress-label">Respondidas</p>
+              <p class="progress-count"><span id="answer-count">0</span><span class="count-divider">/</span><span id="answer-count-total">0</span><span class="progress-caption">preguntas</span></p>
+            </div>
+          </div>
+          <div class="progress-track" id="answer-progress-track" role="progressbar" aria-label="Preguntas respondidas" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+            <span class="progress-fill" id="answer-progress-fill"></span>
+          </div>
+        </section>
+        <form id="answer-sheet" class="question-grid" aria-label="Tus respuestas"></form>
+        <div class="action-row">
+          <button class="secondary-button" id="change-count-button" type="button">Cambiar cantidad</button>
+          <button class="primary-button" id="to-key-button" type="button">Continuar a la clave <span aria-hidden="true">→</span></button>
         </div>
       </section>
 
-      <div class="questions-heading">
-        <div>
-          <h2>Las preguntas</h2>
-          <p>Selecciona A, B, C o D en cada una.</p>
+      <section class="view" id="key-view" aria-labelledby="key-title" hidden>
+        <div class="view-heading">
+          <div>
+            <h2 id="key-title">Introduce la clave correcta</h2>
+            <p>Marca la respuesta válida de cada pregunta para poder corregir el test.</p>
+          </div>
+          <span class="question-total" id="key-total"></span>
         </div>
-        <span class="question-total">50 preguntas</span>
-      </div>
+        <section class="progress-panel" aria-label="Progreso de la clave de respuestas">
+          <div class="progress-info">
+            <div>
+              <p class="progress-label">Clave completada</p>
+              <p class="progress-count"><span id="key-count">0</span><span class="count-divider">/</span><span id="key-count-total">0</span><span class="progress-caption">preguntas</span></p>
+            </div>
+          </div>
+          <div class="progress-track" id="key-progress-track" role="progressbar" aria-label="Clave indicada" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+            <span class="progress-fill" id="key-progress-fill"></span>
+          </div>
+        </section>
+        <form id="key-sheet" class="question-grid" aria-label="Clave correcta del test"></form>
+        <div class="action-row">
+          <button class="secondary-button" id="back-to-answers-button" type="button">Volver a mis respuestas</button>
+          <button class="primary-button" id="grade-button" type="button" disabled>Corregir test <span aria-hidden="true">→</span></button>
+        </div>
+      </section>
 
-      <form id="answer-sheet" class="question-grid" aria-label="Respuestas del test"></form>
+      <section class="view" id="results-view" aria-labelledby="results-title" aria-live="polite" hidden>
+        <section class="score-panel">
+          <p class="score-eyebrow">RESULTADO DEL TEST</p>
+          <h2 id="results-title">Tu nota</h2>
+          <p class="score-value"><span id="score-value">0,00</span><span class="score-out-of">/ 10</span></p>
+          <div class="score-metrics">
+            <div class="score-metric"><span class="metric-dot correct-dot" aria-hidden="true"></span><strong id="correct-count">0</strong><span>correctas</span></div>
+            <div class="score-metric"><span class="metric-dot incorrect-dot" aria-hidden="true"></span><strong id="incorrect-count">0</strong><span>incorrectas</span></div>
+            <div class="score-metric"><span class="metric-dot blank-dot" aria-hidden="true"></span><strong id="blank-count">0</strong><span>en blanco</span></div>
+          </div>
+          <p class="score-formula" id="score-formula"></p>
+        </section>
+
+        <div class="results-heading">
+          <div>
+            <h2>Corrección pregunta a pregunta</h2>
+            <p>En los fallos puedes ver cuál era la opción correcta.</p>
+          </div>
+          <span class="question-total" id="results-total"></span>
+        </div>
+        <ol class="result-list" id="result-list" aria-label="Detalle de la corrección"></ol>
+        <div class="action-row">
+          <button class="secondary-button" id="edit-test-button" type="button">Volver a la clave</button>
+          <button class="primary-button" id="new-test-button" type="button">Empezar otro test <span aria-hidden="true">↻</span></button>
+        </div>
+      </section>
 
       <footer class="page-footer">
         <span class="footer-mark" aria-hidden="true">✓</span>
-        <p>Responde a tu ritmo. Tus selecciones se quedan en esta página mientras la tengas abierta.</p>
+        <p>Se resta un acierto por cada tres errores. Las respuestas en blanco no suman ni restan.</p>
       </footer>
     </main>
   </body>

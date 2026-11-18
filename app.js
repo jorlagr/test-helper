@@ -1,15 +1,23 @@
-const questionCount = 50;
 const choices = ["a", "b", "c", "d"];
+const maximumQuestions = 1000;
+const views = {
+  setup: document.querySelector("#setup-view"),
+  answers: document.querySelector("#answers-view"),
+  key: document.querySelector("#key-view"),
+  results: document.querySelector("#results-view"),
+};
+const setupForm = document.querySelector("#setup-form");
+const questionCountInput = document.querySelector("#question-count");
 const answerSheet = document.querySelector("#answer-sheet");
-const answeredCount = document.querySelector("#answered-count");
-const progressTrack = document.querySelector("#progress-track");
-const progressFill = document.querySelector("#progress-fill");
-const resetButton = document.querySelector("#reset-button");
+const keySheet = document.querySelector("#key-sheet");
+const gradeButton = document.querySelector("#grade-button");
+const resultList = document.querySelector("#result-list");
+let questionCount = 0;
 
-function createQuestion(number) {
+function createQuestion(number, groupName) {
   const card = document.createElement("section");
   card.className = "question-card";
-  card.setAttribute("aria-labelledby", `question-title-${number}`);
+  card.setAttribute("aria-labelledby", `${groupName}-title-${number}`);
 
   const heading = document.createElement("div");
   heading.className = "question-title";
@@ -21,11 +29,12 @@ function createQuestion(number) {
 
   const title = document.createElement("h3");
   title.className = "question-name";
-  title.id = `question-title-${number}`;
+  title.id = `${groupName}-title-${number}`;
   title.textContent = `Pregunta ${number}`;
 
-  const options = document.createElement("div");
+  const options = document.createElement("fieldset");
   options.className = "answer-options";
+  options.setAttribute("aria-label", `Pregunta ${number}`);
 
   for (const choice of choices) {
     const label = document.createElement("label");
@@ -33,7 +42,7 @@ function createQuestion(number) {
 
     const input = document.createElement("input");
     input.type = "radio";
-    input.name = `question-${number}`;
+    input.name = `${groupName}-${number}`;
     input.value = choice;
     input.setAttribute("aria-label", `Pregunta ${number}, opción ${choice.toUpperCase()}`);
 
@@ -56,25 +65,189 @@ function createQuestion(number) {
   return card;
 }
 
-for (let number = 1; number <= questionCount; number += 1) {
-  answerSheet.append(createQuestion(number));
+function createQuestions() {
+  answerSheet.replaceChildren();
+  keySheet.replaceChildren();
+
+  for (let number = 1; number <= questionCount; number += 1) {
+    answerSheet.append(createQuestion(number, "answer"));
+    keySheet.append(createQuestion(number, "key"));
+  }
+
+  for (const id of ["answer-count-total", "key-count-total"]) {
+    document.querySelector(`#${id}`).textContent = String(questionCount);
+  }
+  document.querySelector("#answer-total").textContent = `${questionCount} preguntas`;
+  document.querySelector("#key-total").textContent = `${questionCount} preguntas`;
+  document.querySelector("#answer-progress-track").setAttribute("aria-valuemax", String(questionCount));
+  document.querySelector("#key-progress-track").setAttribute("aria-valuemax", String(questionCount));
+  updateProgress(answerSheet, "answer-count", "answer-progress-track", "answer-progress-fill");
+  updateProgress(keySheet, "key-count", "key-progress-track", "key-progress-fill");
 }
 
-function updateProgress() {
-  const answered = answerSheet.querySelectorAll("input:checked").length;
-  answeredCount.textContent = String(answered);
-  progressTrack.setAttribute("aria-valuenow", String(answered));
-  progressFill.style.width = `${(answered / questionCount) * 100}%`;
+function updateProgress(form, countId, trackId, fillId) {
+  const answered = form.querySelectorAll("input:checked").length;
+  document.querySelector(`#${countId}`).textContent = String(answered);
+  document.querySelector(`#${trackId}`).setAttribute("aria-valuenow", String(answered));
+  document.querySelector(`#${fillId}`).style.width = `${(answered / questionCount) * 100}%`;
 
-  for (const card of answerSheet.querySelectorAll(".question-card")) {
+  for (const card of form.querySelectorAll(".question-card")) {
     card.classList.toggle("is-answered", card.querySelector("input:checked") !== null);
+  }
+
+  if (form === keySheet) {
+    gradeButton.disabled = answered !== questionCount;
   }
 }
 
-answerSheet.addEventListener("change", updateProgress);
+function showView(name) {
+  for (const [viewName, view] of Object.entries(views)) {
+    view.hidden = viewName !== name;
+  }
 
-resetButton.addEventListener("click", () => {
-  answerSheet.reset();
-  updateProgress();
+  const currentStep = { setup: 1, answers: 2, key: 3, results: 4 }[name];
+  for (const item of document.querySelectorAll(".step-item")) {
+    const stepNumber = Number(item.dataset.step);
+    item.classList.toggle("is-current", stepNumber === currentStep);
+    item.classList.toggle("is-complete", stepNumber < currentStep);
+    if (stepNumber === currentStep) {
+      item.setAttribute("aria-current", "step");
+    } else {
+      item.removeAttribute("aria-current");
+    }
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function getSelectedValue(form, name) {
+  return form.querySelector(`input[name="${name}"]:checked`)?.value ?? "";
+}
+
+function renderResults() {
+  let correct = 0;
+  let incorrect = 0;
+  let blank = 0;
+  resultList.replaceChildren();
+
+  for (let number = 1; number <= questionCount; number += 1) {
+    const response = getSelectedValue(answerSheet, `answer-${number}`);
+    const key = getSelectedValue(keySheet, `key-${number}`);
+    const item = document.createElement("li");
+    item.className = "result-card";
+
+    const heading = document.createElement("div");
+    heading.className = "result-heading";
+
+    const title = document.createElement("h3");
+    title.className = "question-name";
+    title.textContent = `Pregunta ${number}`;
+
+    const status = document.createElement("span");
+    status.className = "result-status";
+
+    const detail = document.createElement("p");
+    detail.className = "result-detail";
+
+    if (!response) {
+      blank += 1;
+      item.classList.add("result-blank");
+      status.textContent = "En blanco";
+      detail.textContent = `Sin responder. La opción correcta era ${key.toUpperCase()}.`;
+    } else if (response === key) {
+      correct += 1;
+      item.classList.add("result-correct");
+      status.textContent = "Correcta";
+      detail.textContent = `Tu respuesta ${response.toUpperCase()} coincide con la correcta.`;
+    } else {
+      incorrect += 1;
+      item.classList.add("result-incorrect");
+      status.textContent = "Incorrecta";
+      detail.textContent = `Marcaste ${response.toUpperCase()}. La opción correcta era ${key.toUpperCase()}.`;
+    }
+
+    heading.append(title, status);
+    item.append(heading, detail);
+    resultList.append(item);
+  }
+
+  const netCorrect = Math.max(0, correct - incorrect / 3);
+  const unroundedScore = (netCorrect / questionCount) * 10;
+  const score = Math.round((unroundedScore + Number.EPSILON) * 100) / 100;
+  const scoreFormat = new Intl.NumberFormat("es-ES", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  document.querySelector("#score-value").textContent = scoreFormat.format(score);
+  document.querySelector("#correct-count").textContent = String(correct);
+  document.querySelector("#incorrect-count").textContent = String(incorrect);
+  document.querySelector("#blank-count").textContent = String(blank);
+  document.querySelector("#results-total").textContent = `${questionCount} preguntas`;
+  document.querySelector("#score-formula").textContent =
+    `(${correct} − ${incorrect}/3 errores) ÷ ${questionCount} × 10; nota mínima: 0.`;
+}
+
+setupForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const count = Number(questionCountInput.value);
+  if (!Number.isSafeInteger(count) || count < 1 || count > maximumQuestions) {
+    questionCountInput.setCustomValidity(`Indica un número entero entre 1 y ${maximumQuestions}.`);
+    questionCountInput.reportValidity();
+    return;
+  }
+
+  questionCountInput.setCustomValidity("");
+  questionCount = count;
+  createQuestions();
+  showView("answers");
   answerSheet.querySelector("input")?.focus();
+});
+
+questionCountInput.addEventListener("input", () => {
+  questionCountInput.setCustomValidity("");
+});
+
+answerSheet.addEventListener("change", () => {
+  updateProgress(answerSheet, "answer-count", "answer-progress-track", "answer-progress-fill");
+});
+
+keySheet.addEventListener("change", () => {
+  updateProgress(keySheet, "key-count", "key-progress-track", "key-progress-fill");
+});
+
+document.querySelector("#change-count-button").addEventListener("click", () => {
+  showView("setup");
+  questionCountInput.focus();
+});
+
+document.querySelector("#to-key-button").addEventListener("click", () => {
+  showView("key");
+  keySheet.querySelector("input")?.focus();
+});
+
+document.querySelector("#back-to-answers-button").addEventListener("click", () => {
+  showView("answers");
+  answerSheet.querySelector("input")?.focus();
+});
+
+gradeButton.addEventListener("click", () => {
+  if (keySheet.querySelectorAll("input:checked").length !== questionCount) {
+    return;
+  }
+
+  renderResults();
+  showView("results");
+});
+
+document.querySelector("#edit-test-button").addEventListener("click", () => {
+  showView("key");
+  keySheet.querySelector("input")?.focus();
+});
+
+document.querySelector("#new-test-button").addEventListener("click", () => {
+  setupForm.reset();
+  questionCount = 0;
+  showView("setup");
+  questionCountInput.focus();
 });
