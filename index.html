@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#f5f7fb">
     <meta name="description" content="Corrige tests, consulta las respuestas correctas y calcula la nota sobre 10.">
     <title>Corrección de test | Test listo</title>
-    <link rel="stylesheet" href="styles.css?v=3">
-    <script src="app.js?v=3" defer></script>
+    <link rel="stylesheet" href="styles.css?v=4">
+    <script src="app.js?v=4" defer></script>
   </head>
   <body>
     <main class="page-shell">
@@ -28,7 +28,7 @@
       <ol class="stepper" aria-label="Pasos para corregir el test">
         <li class="step-item" data-step="1"><span class="step-number">1</span><span>Número</span></li>
         <li class="step-item" data-step="2"><span class="step-number">2</span><span>Tu test</span></li>
-        <li class="step-item" data-step="3"><span class="step-number">3</span><span>Clave</span></li>
+        <li class="step-item" data-step="3"><span class="step-number">3</span><span>Corrección</span></li>
         <li class="step-item" data-step="4"><span class="step-number">4</span><span>Resultado</span></li>
       </ol>
 
@@ -67,33 +67,33 @@
         <form id="answer-sheet" class="question-grid" aria-label="Tus respuestas"></form>
         <div class="action-row">
           <button class="secondary-button" id="change-count-button" type="button">Cambiar cantidad</button>
-          <button class="primary-button" id="to-key-button" type="button">Continuar a la clave <span aria-hidden="true">→</span></button>
+          <button class="primary-button" id="to-key-button" type="button">Continuar a la corrección <span aria-hidden="true">→</span></button>
         </div>
       </section>
 
       <section class="view" id="key-view" aria-labelledby="key-title" hidden>
         <div class="view-heading">
           <div>
-            <h2 id="key-title">Introduce la clave correcta</h2>
-            <p>Marca la respuesta válida de cada pregunta para poder corregir el test.</p>
+            <h2 id="key-title">Corrige tus respuestas</h2>
+            <p>Indica la opción correcta en cada pregunta. Verás enseguida si acertaste.</p>
           </div>
           <span class="question-total" id="key-total"></span>
         </div>
-        <section class="progress-panel" aria-label="Progreso de la clave de respuestas">
+        <section class="progress-panel" aria-label="Progreso de la corrección">
           <div class="progress-info">
             <div>
-              <p class="progress-label">Clave completada</p>
+              <p class="progress-label">Preguntas corregidas</p>
               <p class="progress-count"><span id="key-count">0</span><span class="count-divider">/</span><span id="key-count-total">0</span><span class="progress-caption">preguntas</span></p>
             </div>
           </div>
-          <div class="progress-track" id="key-progress-track" role="progressbar" aria-label="Clave indicada" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+          <div class="progress-track" id="key-progress-track" role="progressbar" aria-label="Preguntas corregidas" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
             <span class="progress-fill" id="key-progress-fill"></span>
           </div>
         </section>
-        <form id="key-sheet" class="question-grid" aria-label="Clave correcta del test"></form>
+        <form id="key-sheet" class="question-grid" aria-label="Corrección pregunta a pregunta"></form>
         <div class="action-row">
           <button class="secondary-button" id="back-to-answers-button" type="button">Volver a mis respuestas</button>
-          <button class="primary-button" id="grade-button" type="button" disabled>Corregir test <span aria-hidden="true">→</span></button>
+          <button class="primary-button" id="grade-button" type="button" disabled>Ver nota final <span aria-hidden="true">→</span></button>
         </div>
       </section>
 
@@ -119,7 +119,7 @@
         </div>
         <ol class="result-list" id="result-list" aria-label="Detalle de la corrección"></ol>
         <div class="action-row">
-          <button class="secondary-button" id="edit-test-button" type="button">Volver a la clave</button>
+          <button class="secondary-button" id="edit-test-button" type="button">Volver a la corrección</button>
           <button class="primary-button" id="new-test-button" type="button">Empezar otro test <span aria-hidden="true">↻</span></button>
         </div>
       </section>

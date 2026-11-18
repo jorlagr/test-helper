@@ -909,6 +909,65 @@ h1 span {
   text-align: center;
 }
 
+.answer-review {
+  margin: -4px 0 12px;
+  color: #5368d4;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.answer-option.is-user-answer .option-face {
+  border-color: #e7aaaa;
+  color: #b94f4f;
+  background: #fff3f3;
+}
+
+.key-sheet .question-card.is-correct,
+.key-sheet .question-card.is-blank {
+  border-color: #cfeade;
+}
+
+.key-sheet .question-card.is-incorrect {
+  border-color: #f0d4d4;
+}
+
+.key-sheet .question-card.is-correct .answer-option input:checked + .option-face,
+.key-sheet .question-card.is-incorrect .answer-option input:checked + .option-face,
+.key-sheet .question-card.is-blank .answer-option input:checked + .option-face,
+.key-sheet .question-card.is-correct .answer-option.is-user-answer .option-face {
+  border-color: #9bd9c1;
+  color: #16835d;
+  background: #eaf8f3;
+}
+
+.key-sheet .question-card.is-correct .answer-option input:checked + .option-face .option-check,
+.key-sheet .question-card.is-incorrect .answer-option input:checked + .option-face .option-check,
+.key-sheet .question-card.is-blank .answer-option input:checked + .option-face .option-check {
+  border-color: #16835d;
+  color: white;
+  background: #16835d;
+}
+
+.correction-feedback {
+  margin: 12px 0 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.question-card.is-correct .correction-feedback,
+.question-card.is-blank .correction-feedback {
+  color: #16835d;
+  background: #eaf8f3;
+}
+
+.question-card.is-incorrect .correction-feedback {
+  color: #b94f4f;
+  background: #fff3f3;
+}
+
 @media (max-width: 640px) {
   .stepper {
     gap: 12px;

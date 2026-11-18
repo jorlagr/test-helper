@@ -32,6 +32,14 @@ function createQuestion(number, groupName) {
   title.id = `${groupName}-title-${number}`;
   title.textContent = `Pregunta ${number}`;
 
+  const isCorrectionQuestion = groupName === "key";
+  const response = isCorrectionQuestion ? getSelectedValue(answerSheet, `answer-${number}`) : "";
+  const responseNote = document.createElement("p");
+  responseNote.className = "answer-review";
+  responseNote.textContent = response
+    ? `Marcaste: ${response.toUpperCase()}`
+    : "No marcaste respuesta (en blanco).";
+
   const options = document.createElement("fieldset");
   options.className = "answer-options";
   options.setAttribute("aria-label", `Pregunta ${number}`);
@@ -39,6 +47,9 @@ function createQuestion(number, groupName) {
   for (const choice of choices) {
     const label = document.createElement("label");
     label.className = "answer-option";
+    if (isCorrectionQuestion && response === choice) {
+      label.classList.add("is-user-answer");
+    }
 
     const input = document.createElement("input");
     input.type = "radio";
@@ -61,7 +72,16 @@ function createQuestion(number, groupName) {
   }
 
   heading.append(numberLabel, title);
-  card.append(heading, options);
+  if (isCorrectionQuestion) {
+    const feedback = document.createElement("p");
+    feedback.className = "correction-feedback";
+    feedback.setAttribute("role", "status");
+    feedback.setAttribute("aria-live", "polite");
+    feedback.hidden = true;
+    card.append(heading, responseNote, options, feedback);
+  } else {
+    card.append(heading, options);
+  }
   return card;
 }
 
@@ -122,6 +142,42 @@ function showView(name) {
 
 function getSelectedValue(form, name) {
   return form.querySelector(`input[name="${name}"]:checked`)?.value ?? "";
+}
+
+function updateCorrection(number) {
+  const response = getSelectedValue(answerSheet, `answer-${number}`);
+  const key = getSelectedValue(keySheet, `key-${number}`);
+  const card = keySheet.querySelectorAll(".question-card")[number - 1];
+  const responseNote = card.querySelector(".answer-review");
+  const feedback = card.querySelector(".correction-feedback");
+
+  responseNote.textContent = response
+    ? `Marcaste: ${response.toUpperCase()}`
+    : "No marcaste respuesta (en blanco).";
+
+  for (const option of card.querySelectorAll(".answer-option")) {
+    const input = option.querySelector("input");
+    option.classList.toggle("is-user-answer", input.value === response);
+  }
+
+  card.classList.remove("is-correct", "is-incorrect", "is-blank");
+  if (!key) {
+    feedback.hidden = true;
+    feedback.textContent = "";
+    return;
+  }
+
+  feedback.hidden = false;
+  if (!response) {
+    card.classList.add("is-blank");
+    feedback.textContent = `En blanco. La opción correcta era ${key.toUpperCase()}.`;
+  } else if (response === key) {
+    card.classList.add("is-correct");
+    feedback.textContent = `¡Correcta! Marcaste ${response.toUpperCase()} y la respuesta correcta es ${key.toUpperCase()}.`;
+  } else {
+    card.classList.add("is-incorrect");
+    feedback.textContent = `Incorrecta. Marcaste ${response.toUpperCase()}; la respuesta correcta era ${key.toUpperCase()}.`;
+  }
 }
 
 function renderResults() {
@@ -242,12 +298,16 @@ questionCountInput.addEventListener("input", () => {
   questionCountInput.setCustomValidity("");
 });
 
-answerSheet.addEventListener("change", () => {
+answerSheet.addEventListener("change", (event) => {
   updateProgress(answerSheet, "answer-count", "answer-progress-track", "answer-progress-fill");
+  const number = Number(event.target.name.slice("answer-".length));
+  updateCorrection(number);
 });
 
-keySheet.addEventListener("change", () => {
+keySheet.addEventListener("change", (event) => {
   updateProgress(keySheet, "key-count", "key-progress-track", "key-progress-fill");
+  const number = Number(event.target.name.slice("key-".length));
+  updateCorrection(number);
 });
 
 document.querySelector("#change-count-button").addEventListener("click", () => {
